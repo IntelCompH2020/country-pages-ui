@@ -1,0 +1,13 @@
+<div class="uk-container">
+  <div>
+    question1: {{surveyAnswer?.answer['SCIENCE, TECHNOLOGY & INNOVATION - STI POLICY FRAMEWORK']['Question1']}}
+  </div>
+  <div>
+    question11:
+    <span *ngFor="let element of surveyAnswer?.answer['OPEN SCIENCE POLICY']['Question11']">
+      {{element['Question11-1'] + ','}}
+    </span>
+  </div>
+</div>
+
+<pre>{{surveyAnswer?.answer | json}}</pre>
