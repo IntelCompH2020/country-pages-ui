@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:madgeek-arc/survey-tool.git
+	branch = master
+	commit = 9c47d172a1be76d1791da507bb08be728a31d7f8
+	parent = 913fe2e63112226ce226406ffc29f1c760756901
+	method = merge
+	cmdver = 0.4.3
