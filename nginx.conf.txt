@@ -1,0 +1,23 @@
+server {
+    ${ADD_SERVER_NAME}
+    listen 80;
+    root /usr/share/nginx/html;
+
+    ${CACHE_CONF}
+
+    location / {
+        try_files $uri$args $uri$args/ /index.html;
+    }
+
+    location ~* \.(eot|ttf|woff)$ {
+        add_header Access-Control-Allow-Origin *;
+        expires 1M;
+        add_header Cache-Control "max-age=2629746, public";
+    }
+
+    ${ADD_PROXY_API}
+
+    ${ADD_PROXY_STATS_API}
+
+}
+
