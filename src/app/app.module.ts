@@ -9,12 +9,10 @@ import {SurveyToolModule} from "../survey-tool/app/survey-tool.module";
 import {UserService} from "../survey-tool/app/services/user.service";
 import {SharedModule} from "./shared/shared.module";
 import {HttpInterceptorService} from "./pages/services/http-interceptor.service";
-import {CountryLandingPageComponent} from "./pages/country-landing-page/country-landing-page.component";
 
 @NgModule({
   declarations: [
-    AppComponent,
-    CountryLandingPageComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
