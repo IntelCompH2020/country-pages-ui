@@ -5,6 +5,8 @@
   --eosc-observatory-primary-color: #FF006E;
   --eosc-observatory-secondary-color: #151F2E;
 
+  --section-secondary-background-color: #151F2E;
+
   --sidebar-width: 320px;
   //--sidebar-width: 280px;
   --header-height: 80px;
@@ -57,4 +59,8 @@
   --button-secondary-color: #fff;
   --button-secondary-background-color: #3086ED;
   --button-secondary-hover-background-color: #0053ba;
+}
+
+.uk-button-primary:hover {
+  background-color: var(--eosc-observatory-secondary-color);
 }
