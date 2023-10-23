@@ -53,14 +53,16 @@ export class ScaleFieldComponent implements AfterContentInit {
   /** other stuff--> **/
   enableDisableField(value, enableValue) {
 
-    if (value === enableValue) {
+    if (value?.toString() == enableValue) {
       this.formControl.enable();
       this.hideField = false;
+      this.fieldData.form.display.visible = true;
 
     } else {
       this.formControl.disable();
       this.formControl.reset();
       this.hideField = true;
+      this.fieldData.form.display.visible = false;
     }
 
   }

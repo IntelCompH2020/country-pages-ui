@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {Field, HandleBitSet, UiVocabulary} from "../../../../domain/dynamic-form-model";
 import {FormArray, FormControl, FormGroup, FormGroupDirective, Validators} from "@angular/forms";
 import {FormControlService} from "../../../../services/form-control.service";
+import {forEach} from "@angular-devkit/schematics";
 
 @Component({
   selector: 'app-composite-field',
@@ -37,13 +38,21 @@ export class CompositeFieldComponent implements OnInit {
       // console.log(this.form);
     }
     // console.log(this.form);
-    if(this.fieldData.form.dependsOn) { // specific changes for composite field, maybe revise it
-      this.enableDisableField(this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).value);
+    this.fieldData.form?.dependsOn?.name.split(';').forEach((name) => {
+      this.enableDisableField(this.rootFormGroup.form.get(name).value, this.fieldData.form.dependsOn?.value);
 
-      this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).valueChanges.subscribe(value => {
-        this.enableDisableField(value);
+      this.rootFormGroup.form.get(name).valueChanges.subscribe(value => {
+        this.enableDisableField(value, this.fieldData.form.dependsOn?.value);
       });
-    }
+    })
+
+    // if(this.fieldData.form.dependsOn) { // specific changes for composite field, maybe revise it
+    //   this.enableDisableField(this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).value, this.fieldData.form.dependsOn?.value);
+    //
+    //   this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).valueChanges.subscribe(value => {
+    //     this.enableDisableField(value, this.fieldData.form.dependsOn?.value);
+    //   });
+    // }
   }
 
   /** Handle Arrays --> **/
@@ -146,13 +155,39 @@ export class CompositeFieldComponent implements OnInit {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  enableDisableField(value) {
-    // console.log(value);
-    if (value === 'Applicable' || value === 'Yes') {
+  enableDisableField(value, enableValue?) {
+
+    if (this.fieldData.form?.dependsOn?.name.split(';').length > 1) {
+
+      let flag = false;
+      this.fieldData.form?.dependsOn?.name.split(';').forEach((name) => {
+        if (this.rootFormGroup.form.get(name).value?.toString() == enableValue)
+          flag = true;
+
+      });
+      if (flag) {
+        this.form.enable();
+        this.hideField = false;
+        this.fieldData.form.display.visible = true;
+      } else {
+        this.form.disable();
+        this.form.reset();
+        this.hideField = true;
+        this.fieldData.form.display.visible = false;
+      }
+      return;
+    }
+
+    if (value === 'Applicable') {
       this.form.enable();
       this.hideField = false;
       this.fieldData.form.display.visible = true;
-
+      return
+    }
+    if (value?.toString() == enableValue) {
+      this.form.enable();
+      this.hideField = false;
+      this.fieldData.form.display.visible = true;
     } else {
       this.form.disable();
       this.form.reset();

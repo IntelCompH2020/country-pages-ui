@@ -2,7 +2,7 @@
 
   <div class="uk-margin-bottom">
     <span *ngIf="fieldData.label.text" class="uk-form-label uk-width-9-10 {{fieldData.label.cssClasses}}"
-          [attr.for]="fieldData.name" style="{{fieldData.label.style}}" [innerHTML]="fieldData.label.text">
+          [attr.for]="fieldData.name" [innerHTML]="fieldData.label.text" style="{{fieldData.label.style}}">
     </span>
     <span>{{fieldData.form.mandatory ? ' (*)' : ''}}</span>
   </div>
