@@ -31,6 +31,7 @@
                 <app-composite-field [fieldData]="control" [subVocabularies]="subVocabularies" [readonly]="readonly"
                                      [vocabularies]="vocabularies" (hasChanges)="unsavedChangesPrompt()"
                                      [position]="i" (handleBitSets)="handleBitsetOfChildren($event)"
+                                     [parentForm]="parentForm"
                                      (handleBitSetsOfComposite)="handleCompositeBitsetOfChildren($event)">
                 </app-composite-field>
               </div>
@@ -133,6 +134,7 @@
           <div *ngIf="control.typeInfo.type === 'composite'">
             <app-composite-field [fieldData]="control" [subVocabularies]="subVocabularies" [vocabularies]="vocabularies"
                                  (handleBitSets)="handleBitsetOfChildren($event)" (hasChanges)="unsavedChangesPrompt()"
+                                 [parentForm]="parentForm"
                                  (handleBitSetsOfComposite)="handleCompositeBitsetOfChildren($event)">
             </app-composite-field>
           </div>
@@ -170,7 +172,7 @@
 
           <div *ngIf="control.typeInfo.type === 'checkbox'" class="uk-form-controls">
             <app-checkbox-field [fieldData]="control" (hasChanges)="unsavedChangesPrompt()"
-                                (handleBitSets)="handleBitsetOfChildren($event)"
+                                (handleBitSets)="handleBitsetOfChildren($event)" (disableChapter)="chapterEdit($event)"
                                 (handleBitSetsOfComposite)="handleCompositeBitsetOfChildren($event)">
             </app-checkbox-field>
           </div>

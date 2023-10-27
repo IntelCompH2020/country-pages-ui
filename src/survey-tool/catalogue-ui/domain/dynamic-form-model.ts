@@ -205,3 +205,8 @@ export class HandleBitSet {
   field: Field;
   position: number;
 }
+
+export interface DisableChapter {
+  name: string;
+  enable: boolean;
+}

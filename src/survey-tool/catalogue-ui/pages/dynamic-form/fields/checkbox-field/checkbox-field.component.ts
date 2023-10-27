@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
+import {DisableChapter, Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
 import {FormArray, FormControl, FormGroup, FormGroupDirective, Validators} from "@angular/forms";
 
 @Component({
@@ -13,6 +13,7 @@ export class CheckboxFieldComponent implements OnInit {
   @Input() position?: number = null;
 
   @Output() hasChanges = new EventEmitter<boolean>();
+  @Output() disableChapter = new EventEmitter<DisableChapter>();
   @Output() handleBitSets = new EventEmitter<Field>();
   @Output() handleBitSetsOfComposite = new EventEmitter<HandleBitSet>();
 
@@ -23,7 +24,6 @@ export class CheckboxFieldComponent implements OnInit {
   }
 
   ngOnInit() {
-    // console.log(this.fieldData);
     if (this.position !== null) {
       this.form = this.rootFormGroup.control.controls[this.position] as FormGroup;
     } else {
@@ -33,6 +33,14 @@ export class CheckboxFieldComponent implements OnInit {
 
     this.formControl = this.form.get(this.fieldData.name) as FormControl;
     // console.log(this.formControl);
+    if (this.fieldData.form.affects?.length > 0) {
+      this.chapterEdit(this.fieldData.form.affects[0].name, this.rootFormGroup.form.get(this.fieldData.name).value);
+      this.rootFormGroup.form.get(this.fieldData.name).valueChanges.subscribe(
+        next => {
+          this.chapterEdit(this.fieldData.form.affects[0].name, next);
+        }
+      );
+    }
   }
 
   /** Handle Arrays --> **/
@@ -78,6 +86,16 @@ export class CheckboxFieldComponent implements OnInit {
   /** other stuff--> **/
   unsavedChangesPrompt() {
     this.hasChanges.emit(true);
+  }
+
+  chapterEdit(name: string, enable: boolean) {
+    let data: DisableChapter = new class implements DisableChapter {
+        enable: boolean;
+        name: string;
+    };
+    data.name = name;
+    data.enable = enable;
+    this.disableChapter.emit(data);
   }
 
   timeOut(ms: number) {

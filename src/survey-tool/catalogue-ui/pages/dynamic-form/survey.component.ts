@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
 import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
 import {Router} from "@angular/router";
 import {FormControlService} from "../../services/form-control.service";
-import {Section, Field, Model, Tabs} from "../../domain/dynamic-form-model";
+import {Section, Field, Model, Tabs, DisableChapter} from "../../domain/dynamic-form-model";
 import {Columns, Content, DocDefinition, PdfImage, PdfMetadata, PdfTable, TableDefinition} from "../../domain/PDFclasses";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
@@ -89,6 +89,7 @@ export class SurveyComponent implements OnInit, OnChanges {
           this.form.addControl(this.model.sections[i].name, this.formControlService.toFormGroup(this.model.sections[i].subSections, true));
         }
       }
+      // this.form.get('Part C: Energy-GR').disable();
       if (this.payload?.answer) {
         for (let i = 0; i < this.model.sections.length; i++) {
           if (this.payload.answer[this.model.sections[i].name])
@@ -213,6 +214,15 @@ export class SurveyComponent implements OnInit, OnChanges {
       this.chapterChangeMap.set(chapterId[0], true);
     } else {
       this.chapterChangeMap.set(chapterId[0], false);
+    }
+  }
+
+  disableChapter(data: DisableChapter) {
+    if (data.enable) {
+      this.form.get(data.name).enable();
+    } else {
+      this.form.get(data.name).disable();
+      this.form.get(data.name).disable();
     }
   }
 

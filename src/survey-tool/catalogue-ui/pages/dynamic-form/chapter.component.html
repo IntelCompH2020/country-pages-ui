@@ -94,6 +94,7 @@
                               <div *ngFor="let fieldsData of group.fields"
                                    [ngClass]="{'uk-card uk-card-body uk-card-default uk-margin-medium-bottom': fieldsData.form.display?.visible}">
                                 <app-field [editMode]="editMode" [fieldData]="fieldsData" [form]="form"
+                                           (disableChapter)="chapterEdit($event)"
                                            [subVocabularies]="subVocabularies" [vocabularies]="vocabularies"
                                            [readonly]="readonly" (hasChanges)="unsavedChangesPrompt($event)">
 <!--                                           (handleBitSets)="handleBitSet($event)"-->

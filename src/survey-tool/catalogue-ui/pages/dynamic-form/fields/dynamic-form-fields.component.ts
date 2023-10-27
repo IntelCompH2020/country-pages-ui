@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormGroup} from '@angular/forms';
-import {Field, HandleBitSet} from '../../../domain/dynamic-form-model';
+import {DisableChapter, Field, HandleBitSet} from '../../../domain/dynamic-form-model';
 
 @Component({
   selector: 'app-field',
@@ -9,12 +9,14 @@ import {Field, HandleBitSet} from '../../../domain/dynamic-form-model';
 export class DynamicFormFieldsComponent {
   @Input() fieldData: Field;
   @Input() form: FormGroup;
+  @Input() parentForm: FormGroup;
   @Input() vocabularies: Map<string, object[]>;
   @Input() subVocabularies: Map<string, object[]> = null;
   @Input() editMode: any;
   @Input() readonly : boolean = null;
 
   @Output() hasChanges = new EventEmitter<boolean>();
+  @Output() disableChapter = new EventEmitter<DisableChapter>();
   @Output() handleBitSets = new EventEmitter<Field>();
   @Output() handleBitSetsOfComposite = new EventEmitter<HandleBitSet>();
 
@@ -47,6 +49,10 @@ export class DynamicFormFieldsComponent {
 
   unsavedChangesPrompt() {
     this.hasChanges.emit(true);
+  }
+
+  chapterEdit(data: DisableChapter) {
+    this.disableChapter.emit(data);
   }
 
   timeOut(ms: number) {

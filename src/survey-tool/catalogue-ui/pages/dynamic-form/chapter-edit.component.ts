@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {FormControlService} from '../../services/form-control.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {FormArray, FormBuilder} from '@angular/forms';
-import {Section, Field, HandleBitSet, Tab, Tabs} from '../../domain/dynamic-form-model';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {Section, Field, HandleBitSet, Tab, Tabs, DisableChapter} from '../../domain/dynamic-form-model';
 import BitSet from "bitset";
 
 import UIkit from 'uikit';
@@ -15,6 +15,7 @@ import UIkit from 'uikit';
 export class ChapterEditComponent implements OnChanges{
 
   @Input() form: any = null;
+  @Input() parentForm: FormGroup;
   @Input() tabsHeader: string;
   @Input() mandatoryFieldsText: string = null;
   @Input() readonly : boolean = null;
@@ -25,6 +26,7 @@ export class ChapterEditComponent implements OnChanges{
   @Input() fields: Section[] = null;
 
   @Output() chapterHasChanges = new EventEmitter<string[]>();
+  @Output() disableChapter = new EventEmitter<DisableChapter>();
   @Output() submit = new EventEmitter();
 
   editMode = true;
@@ -244,6 +246,10 @@ export class ChapterEditComponent implements OnChanges{
     if (e) {
       this.chapterHasChanges.emit([this.chapter.id, removeChanges]);
     }
+  }
+
+  chapterEdit(data: DisableChapter) {
+    this.disableChapter.emit(data);
   }
   /** <--emit changes**/
 

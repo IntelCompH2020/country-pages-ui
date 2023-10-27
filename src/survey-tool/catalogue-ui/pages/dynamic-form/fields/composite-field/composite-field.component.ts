@@ -1,8 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {Field, HandleBitSet, UiVocabulary} from "../../../../domain/dynamic-form-model";
-import {FormArray, FormControl, FormGroup, FormGroupDirective, Validators} from "@angular/forms";
+import {DisableChapter, Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
+import {FormArray, FormGroup, FormGroupDirective} from "@angular/forms";
 import {FormControlService} from "../../../../services/form-control.service";
-import {forEach} from "@angular-devkit/schematics";
 
 @Component({
   selector: 'app-composite-field',
@@ -16,8 +15,10 @@ export class CompositeFieldComponent implements OnInit {
   @Input() editMode: any;
   @Input() readonly : boolean = null;
   @Input() position?: number = null;
+  @Input() parentForm: FormGroup;
 
   @Output() hasChanges = new EventEmitter<boolean>();
+  @Output() disableChapter = new EventEmitter<DisableChapter>();
   @Output() handleBitSets = new EventEmitter<Field>();
   @Output() handleBitSetsOfComposite = new EventEmitter<HandleBitSet>();
 
@@ -37,7 +38,7 @@ export class CompositeFieldComponent implements OnInit {
       this.form = this.rootFormGroup.control.get(this.fieldData.name) as FormGroup;
       // console.log(this.form);
     }
-    // console.log(this.form);
+    // console.log(this.parentForm);
     this.fieldData.form?.dependsOn?.name.split(';').forEach((name) => {
       this.enableDisableField(this.rootFormGroup.form.get(name).value, this.fieldData.form.dependsOn?.value);
 
@@ -149,6 +150,10 @@ export class CompositeFieldComponent implements OnInit {
   /** other stuff--> **/
   unsavedChangesPrompt() {
     this.hasChanges.emit(true);
+  }
+
+  chapterEdit(data: DisableChapter) {
+    this.disableChapter.emit(data);
   }
 
   timeOut(ms: number) {

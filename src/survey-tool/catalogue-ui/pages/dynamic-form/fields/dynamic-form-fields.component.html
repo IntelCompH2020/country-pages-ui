@@ -7,7 +7,7 @@
         <div *ngIf="fieldData.typeInfo.type === 'composite'">
           <app-composite-field [fieldData]="fieldData" [subVocabularies]="subVocabularies" [vocabularies]="vocabularies"
                                [readonly]="readonly" (hasChanges)="unsavedChangesPrompt()"
-                               (handleBitSets)="handleBitsetOfChildren($event)"
+                               (handleBitSets)="handleBitsetOfChildren($event)" (disableChapter)="chapterEdit($event)"
                                (handleBitSetsOfComposite)="handleCompositeBitsetOfChildren($event)">
           </app-composite-field>
         </div>
