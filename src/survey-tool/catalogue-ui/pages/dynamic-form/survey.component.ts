@@ -16,7 +16,8 @@ const seedRandom = require('seedrandom');
 @Component({
   selector: 'app-survey',
   templateUrl: 'survey.component.html',
-  providers: [FormControlService]
+  providers: [FormControlService],
+  styles: ['.disableClick {pointer-events: none;}']
 })
 
 export class SurveyComponent implements OnInit, OnChanges {
