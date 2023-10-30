@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {DisableChapter, Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
+import {DisableSection, Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
 import {FormArray, FormGroup, FormGroupDirective} from "@angular/forms";
 import {FormControlService} from "../../../../services/form-control.service";
 
@@ -18,7 +18,7 @@ export class CompositeFieldComponent implements OnInit {
   @Input() parentForm: FormGroup;
 
   @Output() hasChanges = new EventEmitter<boolean>();
-  @Output() disableChapter = new EventEmitter<DisableChapter>();
+  @Output() disableChapter = new EventEmitter<DisableSection>();
   @Output() handleBitSets = new EventEmitter<Field>();
   @Output() handleBitSetsOfComposite = new EventEmitter<HandleBitSet>();
 
@@ -152,7 +152,7 @@ export class CompositeFieldComponent implements OnInit {
     this.hasChanges.emit(true);
   }
 
-  chapterEdit(data: DisableChapter) {
+  chapterEdit(data: DisableSection) {
     this.disableChapter.emit(data);
   }
 

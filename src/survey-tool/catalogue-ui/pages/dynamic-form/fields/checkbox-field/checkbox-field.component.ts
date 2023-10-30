@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {DisableChapter, Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
+import {DisableSection, Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
 import {FormArray, FormControl, FormGroup, FormGroupDirective, Validators} from "@angular/forms";
 
 @Component({
@@ -13,7 +13,7 @@ export class CheckboxFieldComponent implements OnInit {
   @Input() position?: number = null;
 
   @Output() hasChanges = new EventEmitter<boolean>();
-  @Output() disableChapter = new EventEmitter<DisableChapter>();
+  @Output() disableChapter = new EventEmitter<DisableSection>();
   @Output() handleBitSets = new EventEmitter<Field>();
   @Output() handleBitSetsOfComposite = new EventEmitter<HandleBitSet>();
 
@@ -89,7 +89,7 @@ export class CheckboxFieldComponent implements OnInit {
   }
 
   chapterEdit(name: string, enable: boolean) {
-    let data: DisableChapter = new class implements DisableChapter {
+    let data: DisableSection = new class implements DisableSection {
         enable: boolean;
         name: string;
     };

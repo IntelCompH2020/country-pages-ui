@@ -206,7 +206,7 @@ export class HandleBitSet {
   position: number;
 }
 
-export interface DisableChapter {
+export interface DisableSection {
   name: string;
   enable: boolean;
 }
