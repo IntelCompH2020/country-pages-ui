@@ -9,10 +9,14 @@ import {SurveyToolModule} from "../survey-tool/app/survey-tool.module";
 import {UserService} from "../survey-tool/app/services/user.service";
 import {SharedModule} from "./shared/shared.module";
 import {HttpInterceptorService} from "./pages/services/http-interceptor.service";
+import {
+  ContributionsHomeExtensionComponent
+} from "./pages/contribution-dashboard-extension/home/contributions-home-extension.component";
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    ContributionsHomeExtensionComponent
   ],
   imports: [
     BrowserModule,
