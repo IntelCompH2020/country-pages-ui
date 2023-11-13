@@ -170,6 +170,7 @@ export class CompositeFieldComponent implements OnInit {
           flag = true;
 
       });
+
       if (flag) {
         this.form.enable();
         this.hideField = false;
@@ -189,7 +190,8 @@ export class CompositeFieldComponent implements OnInit {
       this.fieldData.form.display.visible = true;
       return
     }
-    if (value?.toString() == enableValue) {
+    let values = enableValue.split(';');
+    if (values.includes(value?.toString())) {
       this.form.enable();
       this.hideField = false;
       this.fieldData.form.display.visible = true;
