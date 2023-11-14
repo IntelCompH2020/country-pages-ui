@@ -64,15 +64,17 @@ export class RadioButtonFieldComponent implements OnInit {
 
   /** other stuff--> **/
   enableDisableField(value, enableValue) {
-
-    if (value === enableValue) {
+    let values = enableValue.split(';');
+    if (values.includes(value)) {
       this.formControl.enable();
       this.hideField = false;
+      this.fieldData.form.display.visible = true;
 
     } else {
       this.formControl.disable();
       this.formControl.reset();
       this.hideField = true;
+      this.fieldData.form.display.visible = false;
     }
 
   }

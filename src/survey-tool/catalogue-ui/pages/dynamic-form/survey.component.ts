@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
 import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
 import {Router} from "@angular/router";
 import {FormControlService} from "../../services/form-control.service";
-import {Section, Field, Model, Tabs} from "../../domain/dynamic-form-model";
+import {Section, Field, Model, Tabs, DisableSection} from "../../domain/dynamic-form-model";
 import {Columns, Content, DocDefinition, PdfImage, PdfMetadata, PdfTable, TableDefinition} from "../../domain/PDFclasses";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
@@ -16,7 +16,8 @@ const seedRandom = require('seedrandom');
 @Component({
   selector: 'app-survey',
   templateUrl: 'survey.component.html',
-  providers: [FormControlService]
+  providers: [FormControlService],
+  styles: ['.disableClick {pointer-events: none;}']
 })
 
 export class SurveyComponent implements OnInit, OnChanges {
@@ -41,6 +42,7 @@ export class SurveyComponent implements OnInit, OnChanges {
   chapterForSubmission: Section = null;
   sortedSurveyAnswers: Object = {};
   editMode: boolean = false;
+  groupData: DisableSection[][] = []
   bitset: Tabs = new Tabs;
 
   ready: boolean = false;
@@ -68,7 +70,7 @@ export class SurveyComponent implements OnInit, OnChanges {
     this.ready = false;
     if (this.payload)
       this.editMode = true;
-    if (this.model) {
+    if (this.model && !!this.form.controls) {
       this.currentChapter = this.model.sections[0];
       this.model.sections = this.model.sections.sort((a, b) => a.order - b.order);
       for (const section of this.model.sections) {
@@ -89,6 +91,7 @@ export class SurveyComponent implements OnInit, OnChanges {
           this.form.addControl(this.model.sections[i].name, this.formControlService.toFormGroup(this.model.sections[i].subSections, true));
         }
       }
+      // this.form.get('Part C: Energy-GR').disable();
       if (this.payload?.answer) {
         for (let i = 0; i < this.model.sections.length; i++) {
           if (this.payload.answer[this.model.sections[i].name])
@@ -119,6 +122,7 @@ export class SurveyComponent implements OnInit, OnChanges {
         }, 0);
       }
 
+      this.createSubsectionArray();
     }
   }
 
@@ -214,6 +218,35 @@ export class SurveyComponent implements OnInit, OnChanges {
     } else {
       this.chapterChangeMap.set(chapterId[0], false);
     }
+  }
+
+  disableChapter(data: DisableSection) {
+    if (data.enable) {
+      this.form.get(data.name)?.enable();
+    } else {
+      this.form.get(data.name)?.disable();
+      this.form.get(data.name)?.disable();
+    }
+
+    this.groupData.forEach(group => {
+      let tmp: DisableSection = null;
+      tmp = group.find(x => x.name === data.name);
+      if (tmp)
+        tmp.enable = data.enable
+    });
+  }
+
+  createSubsectionArray() {
+    this.groupData = [];
+    this.model.sections.forEach(
+      section => {
+        let data: DisableSection[] = [];
+        section.subSections.forEach(subsection => {
+          data.push({name: subsection.name, enable: true})
+        });
+        this.groupData.push(data);
+      }
+    );
   }
 
   /** create additional fields for arrays if needed --> **/

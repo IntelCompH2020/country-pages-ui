@@ -1,6 +1,9 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {HomeComponent} from "./pages/home/home.component";
+import {
+  ContributionsHomeExtensionComponent
+} from "./pages/contribution-dashboard-extension/home/contributions-home-extension.component";
 
 const routes: Routes = [
   {
@@ -11,6 +14,15 @@ const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent
+  },
+  {
+    path: 'contributions/:id/',
+    pathMatch: 'full',
+    redirectTo: 'contributions/:id/home'
+  },
+  {
+    path: 'contributions/:id/home',
+    component: ContributionsHomeExtensionComponent,
   },
   {
     path: '',

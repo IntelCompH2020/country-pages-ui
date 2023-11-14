@@ -92,13 +92,21 @@ export class RichTextFieldComponent implements OnInit {
   }
 
   enableDisableField(value, enableValue) {
+    if (!enableValue && !!value) {
+      this.formControl.enable();
+      this.hideField = false;
+      this.fieldData.form.display.visible = true;
+      return;
+    }
     if (value?.toString() == enableValue) {
       this.formControl.enable();
       this.hideField = false;
+      this.fieldData.form.display.visible = true;
     } else {
       this.formControl.disable();
       this.formControl.reset();
       this.hideField = true;
+      this.fieldData.form.display.visible = false;
       // maybe add this if the remaining empty fields are a problem
       // (this.formControl as unknown as FormArray).clear();
     }

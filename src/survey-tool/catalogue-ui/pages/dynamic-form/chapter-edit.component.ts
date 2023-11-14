@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {FormControlService} from '../../services/form-control.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {FormArray, FormBuilder} from '@angular/forms';
-import {Section, Field, HandleBitSet, Tab, Tabs} from '../../domain/dynamic-form-model';
+import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {Section, Field, HandleBitSet, Tab, Tabs, DisableSection} from '../../domain/dynamic-form-model';
 import BitSet from "bitset";
 
 import UIkit from 'uikit';
@@ -10,11 +10,12 @@ import UIkit from 'uikit';
 @Component({
   selector: 'app-chapter-edit',
   templateUrl: './chapter.component.html',
-  providers: [FormControlService]
+  styles: ['.disableClick {pointer-events: none;}']
 })
 export class ChapterEditComponent implements OnChanges{
 
   @Input() form: any = null;
+  @Input() parentForm: FormGroup;
   @Input() tabsHeader: string;
   @Input() mandatoryFieldsText: string = null;
   @Input() readonly : boolean = null;
@@ -23,8 +24,10 @@ export class ChapterEditComponent implements OnChanges{
   @Input() subVocabularies: Map<string, object[]> = null;
   @Input() chapter: Section = null;
   @Input() fields: Section[] = null;
+  @Input() groupData: DisableSection[] = []
 
   @Output() chapterHasChanges = new EventEmitter<string[]>();
+  @Output() disableChapter = new EventEmitter<DisableSection>();
   @Output() submit = new EventEmitter();
 
   editMode = true;
@@ -35,7 +38,6 @@ export class ChapterEditComponent implements OnChanges{
   ready = false;
   showLoader = false;
   hasChanges = false;
-  pendingService = false;
 
   showBitsets = false;
   loaderBitSet = new BitSet;
@@ -51,7 +53,7 @@ export class ChapterEditComponent implements OnChanges{
   }
 
   ngOnChanges(changes:SimpleChanges) {
-    if (this.fields) {
+    if (this.fields && this.groupData.length > 0) {
       this.initializations();
       this.ready = true
     }
@@ -68,6 +70,7 @@ export class ChapterEditComponent implements OnChanges{
     let requiredTabs = 0, requiredTotal = 0;
     let obj = new Map();
     this.fields.forEach(group => {
+
       let tab = new Tab();
       tab.requiredOnTab = tab.remainingOnTab = group.required.topLevel;
       tab.valid = false;
@@ -85,6 +88,7 @@ export class ChapterEditComponent implements OnChanges{
     this.bitset.completedTabsBitSet = new BitSet;
     this.bitset.requiredTabs = requiredTabs;
     this.bitset.requiredTotal = requiredTotal;
+
   }
 
   /** Bitsets-->**/
@@ -244,6 +248,10 @@ export class ChapterEditComponent implements OnChanges{
     if (e) {
       this.chapterHasChanges.emit([this.chapter.id, removeChanges]);
     }
+  }
+
+  chapterEdit(data: DisableSection) {
+    this.disableChapter.emit(data);
   }
   /** <--emit changes**/
 

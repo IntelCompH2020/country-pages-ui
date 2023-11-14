@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {Field, HandleBitSet, UiVocabulary} from "../../../../domain/dynamic-form-model";
-import {FormArray, FormControl, FormGroup, FormGroupDirective, Validators} from "@angular/forms";
+import {DisableSection, Field, HandleBitSet} from "../../../../domain/dynamic-form-model";
+import {FormArray, FormGroup, FormGroupDirective} from "@angular/forms";
 import {FormControlService} from "../../../../services/form-control.service";
 
 @Component({
@@ -15,8 +15,10 @@ export class CompositeFieldComponent implements OnInit {
   @Input() editMode: any;
   @Input() readonly : boolean = null;
   @Input() position?: number = null;
+  @Input() parentForm: FormGroup;
 
   @Output() hasChanges = new EventEmitter<boolean>();
+  @Output() disableChapter = new EventEmitter<DisableSection>();
   @Output() handleBitSets = new EventEmitter<Field>();
   @Output() handleBitSetsOfComposite = new EventEmitter<HandleBitSet>();
 
@@ -36,14 +38,22 @@ export class CompositeFieldComponent implements OnInit {
       this.form = this.rootFormGroup.control.get(this.fieldData.name) as FormGroup;
       // console.log(this.form);
     }
-    // console.log(this.form);
-    if(this.fieldData.form.dependsOn) { // specific changes for composite field, maybe revise it
-      this.enableDisableField(this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).value);
+    // console.log(this.parentForm);
+    this.fieldData.form?.dependsOn?.name.split(';').forEach((name) => {
+      this.enableDisableField(this.rootFormGroup.form.get(name).value, this.fieldData.form.dependsOn?.value);
 
-      this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).valueChanges.subscribe(value => {
-        this.enableDisableField(value);
+      this.rootFormGroup.form.get(name).valueChanges.subscribe(value => {
+        this.enableDisableField(value, this.fieldData.form.dependsOn?.value);
       });
-    }
+    })
+
+    // if(this.fieldData.form.dependsOn) { // specific changes for composite field, maybe revise it
+    //   this.enableDisableField(this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).value, this.fieldData.form.dependsOn?.value);
+    //
+    //   this.rootFormGroup.form.get(this.fieldData.form.dependsOn.name).valueChanges.subscribe(value => {
+    //     this.enableDisableField(value, this.fieldData.form.dependsOn?.value);
+    //   });
+    // }
   }
 
   /** Handle Arrays --> **/
@@ -142,20 +152,54 @@ export class CompositeFieldComponent implements OnInit {
     this.hasChanges.emit(true);
   }
 
+  chapterEdit(data: DisableSection) {
+    this.disableChapter.emit(data);
+  }
+
   timeOut(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  enableDisableField(value) {
-    // console.log(value);
-    if (value === 'Applicable' || value === 'Yes') {
+  enableDisableField(value, enableValue?) {
+
+    if (this.fieldData.form?.dependsOn?.name.split(';').length > 1) {
+
+      let flag = false;
+      this.fieldData.form?.dependsOn?.name.split(';').forEach((name) => {
+        if (this.rootFormGroup.form.get(name).value?.toString() == enableValue)
+          flag = true;
+
+      });
+
+      if (flag) {
+        this.form.enable();
+        this.hideField = false;
+        this.fieldData.form.display.visible = true;
+      } else {
+        this.form.disable();
+        this.form.reset();
+        this.hideField = true;
+        this.fieldData.form.display.visible = false;
+      }
+      return;
+    }
+
+    if (value === 'Applicable') {
       this.form.enable();
       this.hideField = false;
-
+      this.fieldData.form.display.visible = true;
+      return
+    }
+    let values = enableValue.split(';');
+    if (values.includes(value?.toString())) {
+      this.form.enable();
+      this.hideField = false;
+      this.fieldData.form.display.visible = true;
     } else {
       this.form.disable();
       this.form.reset();
       this.hideField = true;
+      this.fieldData.form.display.visible = false;
       // maybe add this if the remaining empty fields are a problem
       // (this.formControl as unknown as FormArray).clear();
 
