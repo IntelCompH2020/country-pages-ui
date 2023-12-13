@@ -1,51 +1,73 @@
 import {Component, OnDestroy, OnInit} from "@angular/core";
-import {Stakeholder} from "../../../domain/userInfo";
+import {Stakeholder, UserInfo} from "../../../domain/userInfo";
 import {UserService} from "../../../services/user.service";
 import {Paging} from "../../../../catalogue-ui/domain/paging";
 import {SurveyService} from "../../../services/survey.service";
 import {Model} from "../../../../catalogue-ui/domain/dynamic-form-model";
-import {Subscriber} from "rxjs";
+import {Subject, Subscriber} from "rxjs";
+import {StakeholdersService} from "../../../services/stakeholders.service";
+import {ActivatedRoute, Router} from "@angular/router";
+import {takeUntil} from "rxjs/operators";
 
 @Component({
   selector: 'app-contributions-my-surveys',
   templateUrl: './my-surveys.component.html',
-  providers: [SurveyService]
+  providers: [SurveyService, StakeholdersService]
 })
 
 export class MySurveysComponent implements OnInit, OnDestroy{
 
-  subscriptions = [];
-  currentGroup: Stakeholder = null;
+  private _destroyed: Subject<boolean> = new Subject();
+  id: string = null;
+  stakeholder: Stakeholder = null;
   surveys: Paging<Model>;
 
-  constructor(private userService: UserService, private surveyService: SurveyService) {
+  constructor(private userService: UserService, private surveyService: SurveyService,
+              private route: ActivatedRoute, private stakeholdersService: StakeholdersService) {
   }
 
   ngOnInit() {
-    this.subscriptions.push(
-      this.userService.currentStakeholder.subscribe(
-        next => {
-          this.currentGroup = !!next ? next : JSON.parse(sessionStorage.getItem('currentStakeholder'));
-          if (this.currentGroup !== null) {
-            this.subscriptions.push(
-              this.surveyService.getSurveys('stakeholderId', this.currentGroup.id).subscribe(next => {
-                this.surveys = next;
-              })
-            );
-          }
-        },
-        error => {console.error(error)},
-        () => {}
-      )
+    this.route.params.pipe(takeUntil(this._destroyed)).subscribe(
+      params => {
+        this.id = params['id']
+        if (this.id)
+          this.getStakeholder();
+      }
     );
   }
 
-  ngOnDestroy() {
-    this.subscriptions.forEach(subscription => {
-      if (subscription instanceof Subscriber) {
-        subscription.unsubscribe();
+  getStakeholder() {
+    this.stakeholdersService.getStakeholder(this.id).pipe(takeUntil(this._destroyed)).subscribe(
+      res => {
+        this.stakeholder = res;
+      },
+      error => {
+        console.error(error);
+      },
+      () => {
       }
-    });
+    );
+
+    let userInfo: UserInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+    if (userInfo) {
+      userInfo.stakeholders.forEach(sh => {
+        if (sh.id === this.id)
+          this.stakeholder = sh;
+      });
+    }
+
+    if (this.stakeholder) {
+      this.userService.currentStakeholder.next(this.stakeholder);
+      this.surveyService.getSurveys('stakeholderId', this.stakeholder.id).pipe(takeUntil(this._destroyed))
+        .subscribe(next => {
+          this.surveys = next;
+        });
+    }
+
   }
 
+  ngOnDestroy() {
+    this._destroyed.next(true);
+    this._destroyed.complete();
+  }
 }
