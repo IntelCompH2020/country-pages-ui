@@ -21,6 +21,7 @@ export class MySurveysComponent implements OnInit, OnDestroy{
   id: string = null;
   stakeholder: Stakeholder = null;
   surveys: Paging<Model>;
+  userInfo: UserInfo;
 
   constructor(private userService: UserService, private surveyService: SurveyService,
               private route: ActivatedRoute, private stakeholdersService: StakeholdersService) {
@@ -48,21 +49,27 @@ export class MySurveysComponent implements OnInit, OnDestroy{
       }
     );
 
-    let userInfo: UserInfo = JSON.parse(sessionStorage.getItem('userInfo'));
-    if (userInfo) {
-      userInfo.stakeholders.forEach(sh => {
-        if (sh.id === this.id)
-          this.stakeholder = sh;
-      });
-    }
+    this.userService.getUserInfo().pipe(takeUntil(this._destroyed)).subscribe({
+      next: value => {
+        if (value) {
+          this.userInfo = value;
+          this.userInfo.stakeholders.forEach(sh => {
+            if (sh.id === this.id)
+              this.stakeholder = sh;
+          });
+          if (this.stakeholder) {
+            this.userService.currentStakeholder.next(this.stakeholder);
+            this.surveyService.getSurveys('stakeholderId', this.stakeholder.id).pipe(takeUntil(this._destroyed))
+              .subscribe(next => {
+                this.surveys = next;
+              });
+          }
+        }
+      }
+    });
 
-    if (this.stakeholder) {
-      this.userService.currentStakeholder.next(this.stakeholder);
-      this.surveyService.getSurveys('stakeholderId', this.stakeholder.id).pipe(takeUntil(this._destroyed))
-        .subscribe(next => {
-          this.surveys = next;
-        });
-    }
+
+
 
   }
 

@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {SurveyService} from "../../../services/survey.service";
 import {UserService} from "../../../services/user.service";
 import {SurveyInfo} from "../../../domain/survey";
-import {Stakeholder} from "../../../domain/userInfo";
+import { Coordinator, Stakeholder, UserInfo } from "../../../domain/userInfo";
 import {Paging} from "../../../../catalogue-ui/domain/paging";
 import {URLParameter} from "../../../../catalogue-ui/domain/url-parameter";
 import {Subscriber} from "rxjs";
@@ -17,7 +17,9 @@ export class CoordinatorsComponent implements OnInit, OnDestroy{
 
   subscriptions = [];
   urlParameters: URLParameter[] = [];
+  userInfo: UserInfo = null;
   stakeholder: Stakeholder = null;
+  coordinator: Coordinator = null;
 
   surveyEntries: Paging<SurveyInfo>;
   surveyEntriesResults: SurveyInfo[];
@@ -71,10 +73,31 @@ export class CoordinatorsComponent implements OnInit, OnDestroy{
         );
       })
     );
-    this.subscriptions.push(
-      this.userService.currentStakeholder.subscribe(
-        next => this.stakeholder = !!next ? next : JSON.parse(sessionStorage.getItem('currentStakeholder'))
-      )
+
+    this.userService.getUserInfo().subscribe(
+      next => {
+        this.userInfo = next;
+        if (this.userInfo) {
+          this.userInfo.stakeholders.every(sh => {
+            if (sh.id === this.id) {
+              this.stakeholder = sh;
+              this.userService.changeCurrentStakeholder(this.stakeholder);
+              return false;
+            }
+            return true;
+          });
+
+          this.userInfo.coordinators.every(co => {
+            if (co.id === this.id) {
+              this.coordinator = co;
+              this.userService.changeCurrentCoordinator(this.coordinator);
+              return false;
+            }
+            return true;
+          });
+
+        }
+      }
     );
 
   }

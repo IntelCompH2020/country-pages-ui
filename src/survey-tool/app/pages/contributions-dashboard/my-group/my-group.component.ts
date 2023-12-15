@@ -5,17 +5,19 @@ import {SurveyService} from "../../../services/survey.service";
 
 import UIkit from 'uikit';
 import {Subscriber} from "rxjs";
+import {ActivatedRoute} from "@angular/router";
+import {StakeholdersService} from "../../../services/stakeholders.service";
 
 @Component({
   selector: 'app-contributions-my-group',
   templateUrl: './my-group.component.html',
-  providers: [SurveyService]
+  providers: [SurveyService, StakeholdersService]
 })
 
 export class MyGroupComponent implements OnInit, OnDestroy {
 
   subscriptions = [];
-  currentGroup: Stakeholder = null;
+  stakeholder: Stakeholder = null;
   members: GroupMembers = null
   contributorEmail: string = null;
   userEmail: string = null;
@@ -24,29 +26,44 @@ export class MyGroupComponent implements OnInit, OnDestroy {
   errorMessage: string = null;
   title = 'copy to clipboard';
 
-  constructor(private userService: UserService, private surveyService: SurveyService) {
+  constructor(private userService: UserService, private surveyService: SurveyService, private route: ActivatedRoute,
+              private stakeholdersService: StakeholdersService) {
   }
 
   ngOnInit() {
     this.subscriptions.push(
       this.userService.currentStakeholder.subscribe(next => {
-        this.currentGroup = !!next ? next : JSON.parse(sessionStorage.getItem('currentStakeholder'));
-        if (this.currentGroup !== null) {
-          this.subscriptions.push(
-            this.userService.getStakeholdersMembers(this.currentGroup.id).subscribe(next => {
-                this.members = next;
-              },
-              error => {
-                console.error(error);
-              },
-              () => {
-                this.userEmail = this.userService.userId;
-                this.isManager = this.checkIfManager(this.userEmail);
-              }
-            )
-          );
+        this.stakeholder = !!next ? next : JSON.parse(sessionStorage.getItem('currentStakeholder'));
+        if (this.stakeholder !== null) {
+         this.getMembers();
+        } else {
+          // console.log(this.route.snapshot.paramMap.get('id'));
+          this.stakeholdersService.getStakeholder(this.route.snapshot.paramMap.get('id')).subscribe({
+            next: value => {
+              this.stakeholder = value;
+              this.userService.changeCurrentStakeholder(this.stakeholder);
+            },
+            error: err => console.error(err),
+            complete: () => this.getMembers()
+          })
         }
       })
+    );
+  }
+
+  getMembers() {
+    this.subscriptions.push(
+      this.userService.getStakeholdersMembers(this.stakeholder.id).subscribe(next => {
+          this.members = next;
+        },
+        error => {
+          console.error(error);
+        },
+        () => {
+          this.userEmail = this.userService.userId;
+          this.isManager = this.checkIfManager(this.userEmail);
+        }
+      )
     );
   }
 
@@ -61,7 +78,7 @@ export class MyGroupComponent implements OnInit, OnDestroy {
   addContributor(contributor: string = 'contributor') {
     if (this.validateEmail(this.contributorEmail)) {
       this.subscriptions.push(
-        this.surveyService.getInvitationToken(this.contributorEmail, contributor, this.currentGroup.id).subscribe(
+        this.surveyService.getInvitationToken(this.contributorEmail, contributor, this.stakeholder.id).subscribe(
           next => {
             this.invitationToken = location.origin + '/invitation/accept/' + next.toString();
             this.errorMessage = null;
@@ -126,7 +143,7 @@ export class MyGroupComponent implements OnInit, OnDestroy {
 
   removeContributor() {
     this.subscriptions.push(
-      this.surveyService.removeContributor(this.currentGroup.id, this.contributorEmail).subscribe(
+      this.surveyService.removeContributor(this.stakeholder.id, this.contributorEmail).subscribe(
         next => {
           this.members = next;
           this.errorMessage = null;

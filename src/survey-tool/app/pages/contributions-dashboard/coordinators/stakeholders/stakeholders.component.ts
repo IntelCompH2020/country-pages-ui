@@ -7,6 +7,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {fromEvent} from "rxjs";
 import {debounceTime, distinctUntilChanged, map} from "rxjs/operators";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {UserService} from "../../../../services/user.service";
 
 declare var UIkit;
 
@@ -36,12 +37,13 @@ export class StakeholdersComponent implements OnInit {
   currentPage = 0;
 
   constructor(private router: Router, private route: ActivatedRoute, private fb: FormBuilder,
-              private stakeholdersService: StakeholdersService) {
+              private stakeholdersService: StakeholdersService, private userService: UserService) {
   }
 
   ngOnInit() {
 
     this.coordinator = JSON.parse(sessionStorage.getItem('currentCoordinator'));
+
     this.formInitialization();
 
     this.route.queryParams.subscribe(params => {
@@ -60,15 +62,16 @@ export class StakeholdersComponent implements OnInit {
       }
 
       this.updateURLParameters('quantity',this.pageSize);
-
-      this.stakeholdersService.getStakeholdersByType(this.coordinator.type, this.urlParameters).subscribe(
-        res => {this.stakeholders = res;},
-        error => {console.error(error)},
-        () => {
-          this.paginationInit();
-          this.ready = true;
-        }
-      );
+      if (!this.coordinator)
+        this.getCoordinator();
+      else
+        this.stakeholdersService.getStakeholdersByType(this.coordinator.type, this.urlParameters).subscribe(
+          res => {this.stakeholders = res;},
+          error => {console.error(error)},
+          () => {
+            this.paginationInit();
+            this.ready = true;
+          });
     });
 
     fromEvent(this.searchInput.nativeElement, 'keyup').pipe(
@@ -87,8 +90,25 @@ export class StakeholdersComponent implements OnInit {
 
   }
 
+  getCoordinator() {
+    this.stakeholdersService.getCoordinatorById(this.route.snapshot.paramMap.get('id')).subscribe({
+      next: value => this.coordinator = value,
+      error: err => console.error(err),
+      complete: () => {
+        this.userService.changeCurrentCoordinator(this.coordinator);
+        this.stakeholdersService.getStakeholdersByType(this.coordinator.type, this.urlParameters).subscribe(
+          res => {this.stakeholders = res;},
+          error => {console.error(error)},
+          () => {
+            this.paginationInit();
+            this.ready = true;
+          });
+      }
+    })
+  }
+
   formInitialization() {
-    console.log(this.stakeholderForm);
+    // console.log(this.stakeholderForm);
     this.stakeholderForm.get('name').setValidators(Validators.required);
     this.stakeholderForm.get('country').setValidators(Validators.required);
     this.stakeholderForm.get('type').setValidators(Validators.required);

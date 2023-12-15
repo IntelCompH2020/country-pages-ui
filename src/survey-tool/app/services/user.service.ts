@@ -34,12 +34,27 @@ export class UserService {
   }
 
   getUserInfo() {
-    return this.http.get<UserInfo>(this.base + '/user/info');
+    if (this.userInfo.getValue() === null) {
+      this.http.get<UserInfo>(this.base + '/user/info').subscribe({
+        next: value => this.setUserInfo(value),
+        error: err => {
+          console.error(err);
+          this.clearUserInfo();
+        },
+      });
+    }
+
+    return this.userInfo.asObservable();
   }
 
   setUserInfo(userInfo: UserInfo){
     sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
     this.userInfo.next(userInfo);
+  }
+
+  clearUserInfo() {
+    this.userInfo.next(null);
+    this.userInfo.complete();
   }
 
   setUserConsent(id: string) {

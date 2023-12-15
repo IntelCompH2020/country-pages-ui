@@ -28,12 +28,14 @@ export class TopMenuLandingComponent implements OnInit, OnDestroy {
       this.subscriptions.push(
         this.userService.getUserInfo().subscribe(
           next => {
-            this.userService.setUserInfo(next);
+            // this.userService.setUserInfo(next);
             this.userInfo = next;
-            this.showLogin = false
-            this.ready = true;
-            this.showNationalContributionsToEOSC = this.coordinatorOrManager('country');
-            this.showArchive = this.coordinatorContains('country');
+            if (this.userInfo) {
+              this.showLogin = false
+              this.ready = true;
+              this.showNationalContributionsToEOSC = this.coordinatorOrManager('country');
+              this.showArchive = this.coordinatorContains('country');
+            }
           },
           error => {
             console.log(error);
