@@ -68,9 +68,6 @@ export class MySurveysComponent implements OnInit, OnDestroy{
       }
     });
 
-
-
-
   }
 
   ngOnDestroy() {
